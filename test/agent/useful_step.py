@@ -1,47 +1,33 @@
 from base_agent import*
-import pygame
-import sys
-import numpy as np
-from pygamewrapper import PyGameWrapper
-from reversi_board import ReversiBoard
-import utils
 
-class useful_step(PyGameWrapper):
+class useful_step():
+
     def __init__(self, width=600, height=600):
+        self.rows = ['1', '2', '3', '4', '5', '6', '7', '8']
+        self.cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
         self.side_length = min(width, height)
         self.top_left = (0,0)
-        self.board = ReversiBoard(self.side_length, self.top_left)
-        actions = self._init_action_set()
-        super().__init__(width, height, actions=actions)
-
-        self.last_label = '1A'
+        self.actions = self._init_action_set()
+        self.status = {i:0 for i in range(64)}
         self.cur_player = -1
-        self.prev_action_time = 0
+        self.enum = {r+c:i+j*8 for j, c in enumerate(self.cols) for i, r in enumerate(self.rows)}
+    
     def _init_action_set(self): 
         actions = {}
-        for i, row in enumerate(self.board.rows):
-            for j , col in enumerate(self.board.cols):
-                x = 0.1 * self.side_length + 0.8 * (j+0.5) / len(self.board.cols) * self.side_length
-                y = 0.1 * self.side_length + 0.8 * (i+0.5) / len(self.board.rows) * self.side_length
-                actions[row+col] = utils.element_wise_addition(self.top_left, (x, y))
+        for i, row in enumerate(self.rows):
+            for j , col in enumerate(self.cols):
+                x = 0.1 * self.side_length + 0.8 * (j+0.5) / 8 * self.side_length
+                y = 0.1 * self.side_length + 0.8 * (i+0.5) / 8 * self.side_length
+                actions[row+col] = tuple([sum(i) for i in zip(self.top_left, (x, y))])
         return actions
-
-    def pos2label(self, pos):
-        pos = tuple([p - tl for p, tl in zip(pos, self.top_left)])
-        if (pos[0] < 0 or pos[0] > self.side_length or
-            pos[1] < 0 or pos[1] > self.side_length):
-            raise utils.ValueOutOfRange()
-
-        return self.board.pos2label(pos)
 
     def _is_available(self, label, flip=False):
         status = self.get_game_state()
-        if status[self.board.enum[label]]==2:
-            print(status[self.board.enum[label]] )
-        if status[self.board.enum[label]] == 2 and flip == False:
+
+        if status[self.enum[label]] == 2 and flip == False:
             return True
 
-        if status[self.board.enum[label]] == 0 or status[self.board.enum[label]] == 2:
+        if status[self.enum[label]] == 0 or status[self.enum[label]] == 2:
             return self._check_around(label, flip=flip)
 
         return False
@@ -49,67 +35,58 @@ class useful_step(PyGameWrapper):
     def _check_around(self, label, flip):
         is_avail = False
         status = self.get_game_state()
-        row = int(self.board.enum[label] // len(self.board.cols))
-        col = int(self.board.enum[label] % len(self.board.cols))
+        row = int(self.enum[label] // 8)
+        col = int(self.enum[label] % 8)
         for i in range(-1, 2):
-            if row+i < 0 or row+i >= len(self.board.rows): continue
-
+            if row+i < 0 or row+i >= 8: continue
             for j in range(-1, 2):
-                if col+j < 0 or col+j >= len(self.board.cols): continue
-
-                label = self.board.rows[row+i] + self.board.cols[col+j]
-                if status[self.board.enum[label]] == -1 * self.cur_player:
+                if col+j < 0 or col+j >= 8: continue
+                label = self.rows[row+i] + self.cols[col+j]
+                if status[self.enum[label]] == -1 * self.cur_player: #周圍有沒有白棋
                     if self._check_direction(row, col, i, j, flip=flip):
                         is_avail = True
-                    
         return is_avail
 
-    def _check_direction(self, row, col, dx, dy, flip):
+    def _check_direction(self, row, col, dx, dy, flip): 
+        '''
+        沿著有白棋的方向看看末端有沒有黑棋
+        有的話就更新status
+        '''
         is_avail = False
         status = self.get_game_state()
         x, y = [dx], [dy]
-        while 0 <= row+x[-1] < len(self.board.rows) and 0 <= col+y[-1] < len(self.board.cols):
-            label = self.board.rows[row+x[-1]] + self.board.cols[col+y[-1]]
-            if status[self.board.enum[label]] == 0:
+        while 0 <= row+x[-1] < 8 and 0 <= col+y[-1] < 8:
+            label = self.rows[row+x[-1]] + self.cols[col+y[-1]]
+            if status[self.enum[label]] == 0:
                 break
-            if status[self.board.enum[label]] == self.cur_player:
+            if status[self.enum[label]] == self.cur_player:
                 if flip:
                     for r, c in zip(x, y):
-                        self.board.update(self.board.rows[row+r]+self.board.cols[col+c], self.cur_player)
+                        self.status.update(self.rows[row+r]+self.cols[col+c], self.cur_player)
                     is_avail = True
                     break
                 else:
                     return True
-
             x.append(x[-1] + dx)
             y.append(y[-1] + dy)
         return is_avail
 
     def _get_available_actions(self):
         avail = []
-        for row in self.board.rows:
-            for col in self.board.cols:
+        for row in self.rows:
+            for col in self.cols:
                 if self._is_available(row+col):
                     avail.append(row+col)  
         return avail
 
     def get_game_state(self):
-        return self.board.status
+        return self.status
 
-    def get_actions(self):
+    def get_actions(self): 
         return self.actions
 
-if __name__=='__main__':
-    game=useful_step()
-    print(game.get_game_state())
-
-
-
-
-
-
-    
-
-
-
-# print(MyAgent().enum) 
+    def update(self, label, cur_player):
+        '''
+        update  status
+        '''
+        self.status[self.enum[label]] == -1*cur_player
