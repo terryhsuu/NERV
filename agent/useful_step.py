@@ -46,6 +46,7 @@ class useful_step():
                         is_avail = True
         return is_avail
 
+
     def _check_direction(self, row, col, dx, dy, flip): 
         '''
         沿著有白棋的方向看看末端有沒有黑棋
@@ -81,7 +82,7 @@ class useful_step():
     def get_game_state(self):
         return self.status
 
-    def get_actions(self): 
+def get_actions(self):
         return self.actions
 
     def update(self, label, cur_player):
@@ -120,5 +121,3 @@ class useful_step():
         return is_safe
         
         
-
-

@@ -19,9 +19,11 @@ class MyAgent(BaseAgent):
                 cnt += tmp_cnt 
             <<< and do the same thing when d = -1,8,-8,7,-7,9,-9 >>>
             return cnt
-        def §ó·sboard  when place i and check if it will be eaten of not (i):
+        def æ›´æ–°board  when place i and check if it will be eaten of not (i):
             return bool
-        bad_move = {}bn 
+
+
+        bad_move = {}
         side = {}
         max_eats = []
         for pos in available:
@@ -31,9 +33,9 @@ class MyAgent(BaseAgent):
                 side.add(pos)
             max_eats.append({i:eat_amount(i)})
         place = side - bad_move
-        ¦pªGplace¤£¬OªÅ¶°¦X
-        <<< ¦A¨Ó§ä¥Xplace¸Ì­±max_eats³Ì¦hªº¤U >>>
-        ¦pªGplace¬OªÅ¶°¦X¡A§ä¥Xmax_eats¸Ì­±¦©±¼¦bbad_move¸Ì­±ªºkey¤¤value³Ì°ªªº¤U
+        å¦‚æœplaceä¸æ˜¯ç©ºé›†åˆ
+        <<< å†ä¾†æ‰¾å‡ºplaceè£¡é¢max_eatsæœ€å¤šçš„ä¸‹ >>>
+        å¦‚æœplaceæ˜¯ç©ºé›†åˆï¼Œæ‰¾å‡ºmax_eatsè£¡é¢æ‰£æ‰åœ¨bad_moveè£¡é¢çš„keyä¸­valueæœ€é«˜çš„ä¸‹
         '''
     def same_row(i, j):
         return (i//8 == j//8)
