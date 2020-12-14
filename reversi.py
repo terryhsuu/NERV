@@ -14,7 +14,7 @@ class Reversi(PyGameWrapper):
     """
     BG_COLOR = (255, 255, 255)
     FONT = 'font/OpenSans-Regular.ttf'
-    def __init__(self, width=600, height=600, time_limit=30000, bg_color=BG_COLOR, font=FONT):
+    def __init__(self, width=600, height=600, time_limit=30000000, bg_color=BG_COLOR, font=FONT):
         screen_dim = (width, height)
         self.side_length = min(width, height)
         if width >= height:
@@ -36,7 +36,10 @@ class Reversi(PyGameWrapper):
         self.time_limit = time_limit
         self.time_left = {-1: time_limit, 1: time_limit}
 
-    def _init_action_set(self):
+    def _init_action_set(self): 
+        '''
+        棋盤標號
+        '''
         actions = {}
         for i, row in enumerate(self.board.rows):
             for j , col in enumerate(self.board.cols):
@@ -84,10 +87,13 @@ class Reversi(PyGameWrapper):
                 except utils.ValueOutOfRange:
                     raise utils.ValueOutOfRange()
 
-    def _update_scores(self):
+    def _update_scores(self):  
+        '''
+        計算分數
+        '''
         x, y = 0, 0
-        for r in self.board.rows:
-            for c in self.board.cols:
+        for r in self.board.rows:  #[1,2,3,4,5,6,7,8]
+            for c in self.board.cols: #col = ['A', 'B', ... , 'H']
                 status = self.get_game_state()[self.board.enum[r+c]]
                 if status == -1:
                     x += 1
@@ -100,7 +106,9 @@ class Reversi(PyGameWrapper):
     def pos2label(self, pos):
         """
         Change the screen position to the label on the board.
+        pos 為游標位置
         """
+        
         pos = tuple([p - tl for p, tl in zip(pos, self.top_left)])
 
         if (pos[0] < 0 or pos[0] > self.side_length or
@@ -116,7 +124,7 @@ class Reversi(PyGameWrapper):
         Parameters
         ----------
         label: str
-            The reference position
+            The reference position #eg.1A, 7C, 3F, ... (im not sure)
         flip: bool
             Flip the pieces or not
 
@@ -126,6 +134,8 @@ class Reversi(PyGameWrapper):
             Whether able to place the piece or not
         """
         status = self.get_game_state()
+        if status[self.board.enum[label]]==2:
+            print(status[self.board.enum[label]] )
         if status[self.board.enum[label]] == 2 and flip == False:
             return True
 
@@ -337,7 +347,7 @@ class Reversi(PyGameWrapper):
         text_rect.center = utils.element_wise_addition(self.top_left, (0.5 * self.side_length, 0.95 * self.side_length))
         self.screen.blit(text, text_rect)
 
-
+# print(Reversi().top_left)
 if __name__ == '__main__':
     pygame.init()
     game = Reversi(width=600, height=600)
