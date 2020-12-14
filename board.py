@@ -37,7 +37,8 @@ class Board(object):
         for i in range(self.n_blocks):
             self.status[i] = 0
 
-    def reset_status(self):
+    def reset_status(self):  
+        ''' redunant function'''
         self._init_status()
 
     def _enum(self):
@@ -117,3 +118,13 @@ class Board(object):
             block = self.enum[block]
 
         self.status[block] = new_status
+
+if __name__ == '__main__':
+    rows = ['1', '2', '3', '4', '5', '6', '7', '8']
+    cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    pygame.init()
+    board = Board(600, (0,0), rows, cols)
+    print(board.status)
+    print(board.enum)
+    print(board.rows)
+    # print(board.n_blocks)

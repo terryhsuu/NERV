@@ -17,6 +17,7 @@ class ReversiBoard(Board):
         rows = ['1', '2', '3', '4', '5', '6', '7', '8']
         cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
         super().__init__(side_length, top_left, rows, cols)
+        
 
         self.status2color = {
             -1: dark,

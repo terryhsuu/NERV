@@ -7,10 +7,13 @@ import utils
 import importlib
 import argparse
 from tqdm.auto import tqdm
+import copy
 
 def run_agent(agent: BaseAgent, reward: dict, obs: dict):
-    action, event_type = agent.step(reward, obs)
+    action, event_type = agent.step(copy.deepcopy(reward), copy.deepcopy(obs))
     reward = play_ground.act(action, event_type) # reward after an action
+    print(reward)
+    print(obs)
     return reward
 
 def main(play_ground, agent1, agent2, rounds):
@@ -35,6 +38,7 @@ def main(play_ground, agent1, agent2, rounds):
                         pass
                     except utils.NoAvailableAction:
                         # print("ignore black action")
+                        play_ground._get_reward()
                         run_iter += 1
                         break
             else:
@@ -49,6 +53,7 @@ def main(play_ground, agent1, agent2, rounds):
                         pass
                     except utils.NoAvailableAction:
                         # print("ignore white action")
+                        play_ground._get_reward()
                         run_iter += 1
                         break
             run_iter += 1 

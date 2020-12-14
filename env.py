@@ -38,7 +38,7 @@ class Environment(object):
         If False PLE delays between game.step() calls to ensure the fps is
         specified. If not PLE passes an elapsed time delta to ensure the
         game steps by an amount of time consistent with the specified fps.
-        This is usally set to True as it allows the game to run as fast as
+        This is usually set to True as it allows the game to run as fast as
         possible which speeds up training.
 
     display_screen: bool (default: False)
