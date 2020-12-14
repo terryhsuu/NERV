@@ -21,7 +21,7 @@ class MyAgent(BaseAgent):
             return cnt
         def §ó·sboard  when place i and check if it will be eaten of not (i):
             return bool
-        bad_move = {}bn 
+        bad_move = {}
         side = {}
         max_eats = []
         for pos in available:
