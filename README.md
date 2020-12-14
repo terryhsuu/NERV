@@ -1,5 +1,5 @@
 # NERV
-## GitHub Homework of introduction to computer
+GitHub Homework of introduction to computer
 
 ### Team members
 #### Leader
