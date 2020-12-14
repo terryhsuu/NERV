@@ -26,7 +26,6 @@ class useful_step():
 
         if status[self.enum[label]] == 2 and flip == False:
             return True
-
         if status[self.enum[label]] == 0 or status[self.enum[label]] == 2:
             return self._check_around(label, flip=flip)
 
@@ -90,3 +89,36 @@ class useful_step():
         update  status
         '''
         self.status[self.enum[label]] == -1*cur_player
+
+    def how_close_to_edge(self, label):
+        edge = {0,1,2,3,4,5,6,7,8,16,24,32,40,48,56,15,22,30,38,46,54,57,58,59,60,61,62,63}
+        degree = 63
+        for i in edge:
+            if degree > abs(self.enum[label]-i):
+                degree = abs(self.enum[label])
+                if degree == 0: break
+        return degree
+
+    def check_if_safe(self, label):
+        is_safe = 2
+        status = self.get_game_state()
+        row = int(self.enum[label] // 8)
+        col = int(self.enum[label] % 8)
+        for dx in range(-1,2):
+            for dy in range(-1,2):
+                x,y = [dx], [dy]
+                while 0 <= row+x[-1] < 8 and 0 <= col+y[-1] < 8:
+                    label_2 = self.rows[row+x[-1]] + self.cols[col+y[-1]]
+                    if status[self.enum[label_2]] == 0:
+                        break
+                    if status[self.enum[label_2]] == -self.cur_player:
+                        while 0 <= row-x[-1]-dx < 8 and 0 <= col-y[-1]-dy < 8:
+                            x.append(x[-1] - dx)
+                            y.append(y[-1] - dy)
+                            if status[self.enum[self.rows[x[-1]]+self.cols[y[-1]]]] == 0:
+                                is_safe = 0 
+        return is_safe
+        
+        
+
+
