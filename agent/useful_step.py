@@ -1,7 +1,6 @@
 from base_agent import*
 
-class useful_step():
-
+class UsefulStep():
     def __init__(self, width=600, height=600):
         self.rows = ['1', '2', '3', '4', '5', '6', '7', '8']
         self.cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
@@ -22,14 +21,8 @@ class useful_step():
         return actions
 
     def _is_available(self, label, flip=False):
-        status = self.get_game_state()
-
-        if status[self.enum[label]] == 2 and flip == False:
+        if self._check_around(label, flip):
             return True
-        if status[self.enum[label]] == 0 or status[self.enum[label]] == 2:
-            return self._check_around(label, flip=flip)
-
-        return False
 
     def _check_around(self, label, flip):
         is_avail = False
@@ -101,23 +94,31 @@ def get_actions(self):
         return degree
 
     def check_if_safe(self, label):
-        is_safe = 2
+        is_safe = True
         status = self.get_game_state()
         row = int(self.enum[label] // 8)
         col = int(self.enum[label] % 8)
         for dx in range(-1,2):
             for dy in range(-1,2):
-                x,y = [dx], [dy]
-                while 0 <= row+x[-1] < 8 and 0 <= col+y[-1] < 8:
-                    label_2 = self.rows[row+x[-1]] + self.cols[col+y[-1]]
+                x, y = dx, dy
+                while 0 <= row+x < 8 and 0 <= col+y < 8:
+                    label_2 = self.rows[row+x] + self.cols[col+y]
                     if status[self.enum[label_2]] == 0:
                         break
                     if status[self.enum[label_2]] == -self.cur_player:
-                        while 0 <= row-x[-1]-dx < 8 and 0 <= col-y[-1]-dy < 8:
-                            x.append(x[-1] - dx)
-                            y.append(y[-1] - dy)
-                            if status[self.enum[self.rows[x[-1]]+self.cols[y[-1]]]] == 0:
-                                is_safe = 0 
+                        while 0 <= row-x-dx < 8 and 0 <= col-y-dy < 8:
+                            x = x - dx
+                            y = y - dy
+                            if status[self.enum[self.rows[x]+self.cols[y]]] == 0:
+                                is_safe = False
+                                break
         return is_safe
         
+    def if_corner(self, avail_act):
+        for i in  [0,7,56,63]:
+            if i in avail_act:
+                return i
+        return False
+    
+
         
