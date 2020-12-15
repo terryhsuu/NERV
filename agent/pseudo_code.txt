@@ -1,7 +1,6 @@
 from base_agent import *
 from reversi import *
 
-
 class MyAgent(BaseAgent):
     def __init__(self):
         super().__init__()
@@ -19,7 +18,7 @@ class MyAgent(BaseAgent):
                 cnt += tmp_cnt 
             <<< and do the same thing when d = -1,8,-8,7,-7,9,-9 >>>
             return cnt
-        def §ó·sboard  when place i and check if it will be eaten of not (i):
+        def ï¿½ï¿½sboard  when place i and check if it will be eaten of not (i):
             return bool
         bad_move = {}bn 
         side = {}
@@ -31,9 +30,9 @@ class MyAgent(BaseAgent):
                 side.add(pos)
             max_eats.append({i:eat_amount(i)})
         place = side - bad_move
-        ¦pªGplace¤£¬OªÅ¶°¦X
-        <<< ¦A¨Ó§ä¥Xplace¸Ì­±max_eats³Ì¦hªº¤U >>>
-        ¦pªGplace¬OªÅ¶°¦X¡A§ä¥Xmax_eats¸Ì­±¦©±¼¦bbad_move¸Ì­±ªºkey¤¤value³Ì°ªªº¤U
+        ï¿½pï¿½Gplaceï¿½ï¿½ï¿½Oï¿½Å¶ï¿½ï¿½X
+        <<< ï¿½Aï¿½Ó§ï¿½Xplaceï¿½Ì­ï¿½max_eatsï¿½Ì¦hï¿½ï¿½ï¿½U >>>
+        ï¿½pï¿½Gplaceï¿½Oï¿½Å¶ï¿½ï¿½Xï¿½Aï¿½ï¿½Xmax_eatsï¿½Ì­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½bbad_moveï¿½Ì­ï¿½ï¿½ï¿½keyï¿½ï¿½valueï¿½Ì°ï¿½ï¿½ï¿½ï¿½U
         '''
     def same_row(i, j):
         return (i//8 == j//8)

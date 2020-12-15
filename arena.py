@@ -1,4 +1,4 @@
-from agent.base_agent import RandomAgent, HumanAgent, BaseAgent
+from base_agent import RandomAgent, HumanAgent, BaseAgent   #edited : agent.base_Agent
 from reversi import Reversi
 from env import Environment
 from reversi_board import ReversiBoard
@@ -12,8 +12,6 @@ import copy
 def run_agent(agent: BaseAgent, reward: dict, obs: dict):
     action, event_type = agent.step(copy.deepcopy(reward), copy.deepcopy(obs))
     reward = play_ground.act(action, event_type) # reward after an action
-    print(reward)
-    print(obs)
     return reward
 
 def main(play_ground, agent1, agent2, rounds):
@@ -28,6 +26,7 @@ def main(play_ground, agent1, agent2, rounds):
         while play_ground.game_over() == False:
             if (run_iter % 2 == 0):
                 obs = play_ground.get_game_state()
+                
                 while True:
                     try:
                         reward1 = run_agent(agent1, reward1, obs)
@@ -59,8 +58,6 @@ def main(play_ground, agent1, agent2, rounds):
             run_iter += 1 
         
         play_ground._draw_frame()
-
-
         if game.winner == -1:
             n_black_wins += 1
 
@@ -68,7 +65,7 @@ def main(play_ground, agent1, agent2, rounds):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--agent1', default="base_agent.HumanAgent")
+    parser.add_argument('--agent1', default="CasperXu.MyAgent")
     parser.add_argument('--agent2', default="base_agent.RandomAgent")
     parser.add_argument('--width', default=600, type=int)
     parser.add_argument('--height', default=600, type=int)
@@ -90,10 +87,11 @@ if __name__ == "__main__":
     play_ground.init()
     play_ground.display_screen = True
 
-    agent1_module = importlib.import_module("agent."+args.agent1.split('.')[0])
-    agent2_module = importlib.import_module("agent."+args.agent2.split('.')[0])
+    agent1_module = importlib.import_module(args.agent1.split('.')[0]) #edited:"agent."+
+    agent2_module = importlib.import_module(args.agent2.split('.')[0]) #edited"agent."+
+    
 
-    agent1 = getattr(agent1_module, args.agent1.split('.')[1])(color = "black", rows_n = len(rev_board.rows), cols_n = len(rev_board.cols), width = args.width, height = args.height)
-    agent2 = getattr(agent2_module, args.agent2.split('.')[1])(color = "white", rows_n = len(rev_board.rows), cols_n = len(rev_board.cols), width = args.width, height = args.height)
+    agent1 = getattr(agent1_module, args.agent1.split('.')[1])()  #(color = "black", rows_n = len(rev_board.rows), cols_n = len(rev_board.cols), width = args.width, height = args.height)
+    agent2 = getattr(agent2_module, args.agent2.split('.')[1])()  #(color = "white", rows_n = len(rev_board.rows), cols_n = len(rev_board.cols), width = args.width, height = args.height)
     main(play_ground, agent1, agent2, args.rounds)
 

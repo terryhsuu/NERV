@@ -46,6 +46,7 @@ class Reversi(PyGameWrapper):
                 x = 0.1 * self.side_length + 0.8 * (j+0.5) / len(self.board.cols) * self.side_length
                 y = 0.1 * self.side_length + 0.8 * (i+0.5) / len(self.board.rows) * self.side_length
                 actions[row+col] = utils.element_wise_addition(self.top_left, (x, y))
+        # print(actions)
         return actions
 
     def _handle_player_events(self):
@@ -134,8 +135,6 @@ class Reversi(PyGameWrapper):
             Whether able to place the piece or not
         """
         status = self.get_game_state()
-        if status[self.board.enum[label]]==2:
-            print(status[self.board.enum[label]] )
         if status[self.board.enum[label]] == 2 and flip == False:
             return True
 
