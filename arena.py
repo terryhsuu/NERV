@@ -1,4 +1,4 @@
-from base_agent import RandomAgent, HumanAgent, BaseAgent   #edited : agent.base_Agent
+from agent.base_agent import RandomAgent, HumanAgent, BaseAgent   #edited : agent.base_Abase_agent
 from reversi import Reversi
 from env import Environment
 from reversi_board import ReversiBoard
@@ -8,6 +8,7 @@ import importlib
 import argparse
 from tqdm.auto import tqdm
 import copy
+from agent.CasperXu import MyAgent,BaseAgent
 
 def run_agent(agent: BaseAgent, reward: dict, obs: dict):
     action, event_type = agent.step(copy.deepcopy(reward), copy.deepcopy(obs))
@@ -69,7 +70,7 @@ if __name__ == "__main__":
     parser.add_argument('--agent2', default="base_agent.RandomAgent")
     parser.add_argument('--width', default=600, type=int)
     parser.add_argument('--height', default=600, type=int)
-    parser.add_argument('--rounds', default=10, type=int)
+    parser.add_argument('--rounds', default=100, type=int)
     parser.add_argument('--time_limit', default=30000, type=int)
     parser.add_argument('--headless', action='store_true')
     args = parser.parse_args()
@@ -87,11 +88,11 @@ if __name__ == "__main__":
     play_ground.init()
     play_ground.display_screen = True
 
-    agent1_module = importlib.import_module(args.agent1.split('.')[0]) #edited:"agent."+
-    agent2_module = importlib.import_module(args.agent2.split('.')[0]) #edited"agent."+
+    agent1_module = importlib.import_module("agent."+args.agent1.split('.')[0]) #edited:"agent."+
+    agent2_module = importlib.import_module("agent."+args.agent2.split('.')[0]) #edited"agent."+
     
 
-    agent1 = getattr(agent1_module, args.agent1.split('.')[1])()  #(color = "black", rows_n = len(rev_board.rows), cols_n = len(rev_board.cols), width = args.width, height = args.height)
-    agent2 = getattr(agent2_module, args.agent2.split('.')[1])()  #(color = "white", rows_n = len(rev_board.rows), cols_n = len(rev_board.cols), width = args.width, height = args.height)
+    agent1 = getattr(agent1_module, args.agent1.split('.')[1])(color = "black", rows_n = len(rev_board.rows), cols_n = len(rev_board.cols), width = args.width, height = args.height)
+    agent2 = getattr(agent2_module, args.agent2.split('.')[1])(color = "white", rows_n = len(rev_board.rows), cols_n = len(rev_board.cols), width = args.width, height = args.height)
     main(play_ground, agent1, agent2, args.rounds)
 

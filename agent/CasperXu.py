@@ -1,7 +1,17 @@
-from base_agent import*
+from random import *
+import pygame
+import sys
+from pygame.constants import MOUSEBUTTONDOWN, MOUSEMOTION
 
-class UsefulStep():
-    def __init__(self, width=600, height=600):
+class BaseAgent():
+    def __init__(self, color = "black", rows_n = 8, cols_n = 8, width = 600, height = 600):
+
+        self.color = color
+        self.rows_n = rows_n
+        self.cols_n = cols_n
+        self.block_len = 0.8 * min(height, width)/cols_n
+        self.col_offset = (width - height)/2 + 0.1 * min(height, width) + 0.5 * self.block_len
+        self.row_offset = 0.1 * min(height, width) + 0.5 * self.block_len
         self.rows = ['1', '2', '3', '4', '5', '6', '7', '8']
         self.cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
         self.side_length = min(width, height)
@@ -17,6 +27,40 @@ class UsefulStep():
                 count+=1
         self.rev_enum = {y:x for x,y in self.enum.items()}
         
+
+    def step(self, reward, obs):
+        """
+        Parameters
+        ----------
+        reward : dict
+            current_score - previous_score
+            
+            key: -1(black), 1(white)
+            value: numbers
+            
+        obs    :  dict 
+            board status
+
+            key: int 0 ~ 63
+            value: [-1, 0 ,1]
+                    -1 : black
+                     0 : empty
+                     1 : white
+
+        Returns
+        -------
+        tuple:
+            (x, y) represents position, where (0, 0) mean top left. 
+                x: go right
+                y: go down
+        event_type:
+            non human agent uses pygame.USEREVENT
+        """
+
+        raise NotImplementError("You didn't finish your step function. Please override step function of BaseAgent!")
+    
+
+class MyAgent(BaseAgent):        
     def _init_action_set(self): 
         actions = {}
         for i, row in enumerate(self.rows):
@@ -103,7 +147,8 @@ class UsefulStep():
                 x,y = row+dx, col+dy
                 while 0 <= x < 8 and 0 <= y < 8:
                     label_2 = self.rows[x] + self.cols[y]
-                    if status[self.enum[label_2]] == 0 : break
+                    if status[self.enum[label_2]] == 0:
+                        break
                     elif status[self.enum[label_2]] == -self.cur_player:
                         amount = 0
                         while 0 <= x+dx < 8 and 0 <= y+dy < 8:
@@ -120,6 +165,7 @@ class UsefulStep():
     def if_give_corner(self, pos:int):
         for i in [0,7,56,63]:
             if abs(i-pos)==1:return False
+        return True
         
     def if_corner(self, avail_act):
         for pos in  [0,7,56,63]:
@@ -147,6 +193,48 @@ class UsefulStep():
                     break
         return count
 
-if __name__=='__main__':
-    a = UsefulStep()
-    print(a.enum['2B'])
+
+    def step(self, reward, obs):
+        '''
+        status(obs) :  dict     (key:0~63, value:-1,0,1)
+        actions_dict : dict     (key:label, value:abs_pos in board)
+        actions :      list     (label)
+        avail_step :   list     (label)
+        '''
+        
+        self.status = obs
+        action_dict = self._init_action_set()
+        avail_step =  self._get_available_actions()
+        avail_step2 = [self.enum[i] for i in avail_step]
+        
+        
+        if self.if_corner(avail_step2) == 0  :
+            return (action_dict[self.rev_enum[self.if_corner(avail_step2)]],pygame.USEREVENT)
+        
+        good_choose = []
+        for label in avail_step:    
+            degree = self.how_close_to_edge(label)
+            if degree == 0 or degree== 1  and self.if_give_corner(self.enum[label]) and self.check_if_safe(label):
+                good_choose.append(self.enum[label])
+        
+        amount = {i:self.eat_amount(i) for i in good_choose}
+        
+        maxi = (0,0)
+        
+        for i in amount.items():
+            if i[1] >= maxi[1]:
+                maxi = i
+        if maxi != (0,0):
+            return (action_dict[self.rev_enum[maxi[0]]], pygame.USEREVENT)
+        
+        if avail_step != []:
+            not_bad = []
+            for i in avail_step:
+                if self.if_give_corner(self.enum[i]):
+                    not_bad.append(i)
+            if not_bad != []:
+                return (action_dict[sample(not_bad,1)[0]], pygame.USEREVENT)
+            else:return (action_dict[sample(avail_step,1)[0]], pygame.USEREVENT)
+        else: return None 
+
+
