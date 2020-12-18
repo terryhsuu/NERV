@@ -125,46 +125,47 @@ class MyAgent(BaseAgent):
                 if degree == 0: break
         return degree #int
 
-    def check_again(self,x, y, dx, dy):
+
+    def check_again(self, pos, i):
         status = self.get_game_state()
-        while 0 <= x+dx <8 and 0 <= y+dy < 8:
-            label = self.rows[x+dx] + self.cols[y+dy]
-            if status[self.enum[label]] == 0:
+        while 0 <= pos+i <= 63:
+            pos += i
+            if status[pos] == self.cur_player:
+                continue
+            elif status[pos] == -self.cur_player:
                 return True
-            elif status[self.enum[label]] == self.cur_player:
-                x += dx
-                y += dy
             else:
-                return False                 
-    
-    def check_if_safe(self, label:str):
+                break
+        return False  
+
+    def check_if_safe(self,label):
         status = self.get_game_state()
-        row = int(self.enum[label] // 8)
-        col = int(self.enum[label] % 8)
-        count = 0
-        for dx in range(-1,2):
-            for dy in range(-1,2):
-                x,y = row+dx, col+dy
-                while 0 <= x < 8 and 0 <= y < 8:
-                    label_2 = self.rows[x] + self.cols[y]
-                    if status[self.enum[label_2]] == 0:
-                        break
-                    elif status[self.enum[label_2]] == -self.cur_player:
-                        amount = 0
-                        while 0 <= x+dx < 8 and 0 <= y+dy < 8:
-                            amount += 1; x += dx; y += dy
-                            if status[self.enum[self.rows[x]+self.cols[y]]] == 0: break
-                            elif status[self.enum[self.rows[x]+self.cols[y]]] == self.cur_player:
-                                if  self.check_again(x, y, dx, dy):
-                                    count += amount; break
-                                else : count -= (amount+2); break
-                    else: break
-        if count >= 0: return True 
-        else : return False 
+        pos = self.enum[label]
+        valid_step = [1, -1, 8, -8, 7, -7, 9, -9]
+        count = 0 
+        for i in valid_step:
+            pos_ = pos
+            while 0 <= pos_ + i <= 63:
+                pos_+=i
+                if status[pos_] == self.cur_player : continue
+                elif status[pos_] == -self.cur_player:
+                    amount = 0
+                    while 0 <= pos_+i <=63:
+                        amount += 1
+                        pos_ += i
+                        if status[pos_] == self.cur_player:
+                            if self.check_again(pos_, i) : count += amount
+                            else : count -= (amount+2)
+                        elif status[pos_] == -self.cur_player : continue
+                        else: break
+                else: break 
+        if count>0:return True
+        else: return False
     
     def if_give_corner(self, pos:int):
+        status = self.get_game_state()
         for i in [0,7,56,63]:
-            if abs(i-pos)==1:return False
+            if abs(i-pos)==1 and status[pos] != self.cur_player :return False
         return True
         
     def if_corner(self, avail_act):
@@ -173,9 +174,10 @@ class MyAgent(BaseAgent):
                 return pos 
         return -1
     
-    def eat_amount(self, pos):
+    def eat_amount(self, label):
         status = self.get_game_state()
         count = 0
+        pos = self.enum[label]
         valid_step = [1, -1, 8, -8, 7, -7, 9, -9]
         for d in valid_step:
             temp_count = 0
@@ -193,7 +195,40 @@ class MyAgent(BaseAgent):
                     break
         return count
 
-
+    def endpoint(self):
+        status = self.get_game_state()
+        mine = 0
+        enemy = 0
+        corner = 0
+        for i in status:
+            if status[i] == -self.cur_player:
+                enemy += 1
+                if i in [0,7,56,63]:
+                    corner-=1
+            elif status[i] == self.cur_player:
+                mine += 1
+                if i in [0,7,56,63]:
+                    corner+=1
+        if mine + enemy >= 50 and corner >0 :#and mine < enemy:
+            return False 
+        return True
+        
+    def if_risk(self, label):
+        status = self.get_game_state()
+        a = [ 1, 2, 3, 4, 5, 6]
+        b = [57,58,59,60,61,62]
+        c = [ 8,16,24,32,40,48]
+        d = [15,23,31,39,47,55]
+        e = [ 9,18,27,36,45,54]
+        f = [14,21,28,35,42,49]
+        x = [ a, b, c, d, e, f]
+        for list_ in x:
+                if self.enum[label] in list_:
+                    gap = list_[1]-list_[0]
+                    if status[list_[0]-gap] == -self.cur_player and status[list_[-1]+gap] == -self.cur_player:
+                        return False
+        return True 
+        
     def step(self, reward, obs):
         '''
         status(obs) :  dict     (key:0~63, value:-1,0,1)
@@ -207,34 +242,49 @@ class MyAgent(BaseAgent):
         avail_step =  self._get_available_actions()
         avail_step2 = [self.enum[i] for i in avail_step]
         
-        
-        if self.if_corner(avail_step2) == 0  :
-            return (action_dict[self.rev_enum[self.if_corner(avail_step2)]],pygame.USEREVENT)
-        
-        good_choose = []
-        for label in avail_step:    
-            degree = self.how_close_to_edge(label)
-            if degree == 0 or degree== 1  and self.if_give_corner(self.enum[label]) and self.check_if_safe(label):
-                good_choose.append(self.enum[label])
-        
-        amount = {i:self.eat_amount(i) for i in good_choose}
-        
-        maxi = (0,0)
-        
-        for i in amount.items():
-            if i[1] >= maxi[1]:
-                maxi = i
-        if maxi != (0,0):
-            return (action_dict[self.rev_enum[maxi[0]]], pygame.USEREVENT)
-        
-        if avail_step != []:
-            not_bad = []
-            for i in avail_step:
-                if self.if_give_corner(self.enum[i]):
-                    not_bad.append(i)
-            if not_bad != []:
-                return (action_dict[sample(not_bad,1)[0]], pygame.USEREVENT)
-            else:return (action_dict[sample(avail_step,1)[0]], pygame.USEREVENT)
-        else: return None 
+        if self.endpoint():
+            if self.if_corner(avail_step2) != -1  :
+                return (action_dict[self.rev_enum[self.if_corner(avail_step2)]],pygame.USEREVENT)
+            
+            good_choose = []
+            for label in avail_step:    
+                degree = self.how_close_to_edge(label)
+                if degree == 0  and self.if_give_corner(self.enum[label]) and self.check_if_safe(label):
+                    good_choose.append(label)
+            
+            amount = {i:self.eat_amount(i) for i in good_choose}
+            maxi = (0,0)
+            
+            for i in amount.items():
+                if i[1] >= maxi[1]: maxi = i
+            if maxi != (0,0): return (action_dict[maxi[0]], pygame.USEREVENT)
+
+            if avail_step != []:
+                not_bad = []
+                for i in avail_step:
+                    if self.if_give_corner(self.enum[i]) : not_bad.append(i)
+                if not_bad != [] : return (action_dict[sample(not_bad,1)[0]], pygame.USEREVENT)
+                else : return (action_dict[sample(avail_step,1)[0]], pygame.USEREVENT)
+        else:
+            if self.if_corner(avail_step2) != -1  :
+                return (action_dict[self.rev_enum[self.if_corner(avail_step2)]],pygame.USEREVENT)
+            amount = {label:self.eat_amount(label) for label in avail_step if self.if_risk(label)}
+            maxi = (0,0)
+            for i in amount.items():
+                if i[1] >= maxi[1]:
+                    maxi = i
+            if maxi != (0,0):
+                return (action_dict[maxi[0]], pygame.USEREVENT)
+            
+            if avail_step != []:
+                not_bad = []
+                for i in avail_step:
+                    if self.if_give_corner(self.enum[i]):
+                        not_bad.append(i)
+                if not_bad != []:
+                    return (action_dict[sample(not_bad,1)[0]], pygame.USEREVENT)
+                else:
+                    return (action_dict[sample(avail_step,1)[0]], pygame.USEREVENT)
+        return None 
 
 
