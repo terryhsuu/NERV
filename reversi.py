@@ -7,7 +7,7 @@ import utils
 
 class Reversi(PyGameWrapper):
     """
-        game_state:
+        game_state :
             -1: dark side
             0: no piece
             1: light side
