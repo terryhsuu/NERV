@@ -125,7 +125,6 @@ class MyAgent(BaseAgent):
                 if degree == 0: break
         return degree #int
 
-
     def check_again(self, pos, i):
         status = self.get_game_state()
         while 0 <= pos+i <= 63:
