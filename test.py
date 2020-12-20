@@ -78,7 +78,6 @@ class test:
     
     def get_game_state(self):
         return self.status
-
     def predict(self, label):
         status = self.get_game_state()
         count = 0
@@ -94,19 +93,20 @@ class test:
                     temp_count += 1
                     path.append(total_d)
                     total_d += d
-                    
                 elif status[pos+total_d] == self.cur_player:
                     count += temp_count
                     for i in path:
                         status[pos+i] = self.cur_player
                         color_change.append(pos+i)
-                    # print(self.get_game_state())
                     break
                 else :
                     break
         return color_change
 
     def predict2(self,label):
+        '''
+        estimate how much enemy can eat
+        '''
         status = self.get_game_state()
         status[self.enum[label]] = self.cur_player
         color_change = self.predict(label)

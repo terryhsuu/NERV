@@ -166,7 +166,6 @@ class MyAgent(BaseAgent):
         status[self.enum[label]] = self.cur_player
         self.cur_player = -self.cur_player
         color_change = self.predict(label)
-
         avail = self._get_available_actions()
         count = True
         for label2 in avail:
@@ -292,24 +291,6 @@ class MyAgent(BaseAgent):
             status[i] = -self.cur_player
         return if_ok
     
-
- 
-
-    # def if_give_corner(self,label):
-    #     status = self.get_game_state()
-    #     status[self.enum[label]] = self.cur_player
-    #     self.cur_player = -self.cur_player
-    #     color_change = self.predict(label)
-    #     avail = self._get_available_actions()
-    #     status[self.enum[label]] = 0
-    #     self.cur_player = -self.cur_player
-    #     # for i in color_change:
-    #     #     status[i] = -self.cur_player
-    #     for i in [0, 7, 56, 63]:
-    #         if self.rev_enum[i] in avail:
-    #             return False
-    #     return True
-
     def if_give_corner(self, label):
         status = self.get_game_state()
         pos = self.enum[label]
@@ -340,10 +321,10 @@ class MyAgent(BaseAgent):
             good_choose = []
             for label in avail_step:    
                 degree = self.how_close_to_edge(label)
-                if degree == 0  and self.if_give_corner(label) and self.check_if_safe2(label):
+                if degree == 0  and (self.if_give_corner(label) and self.check_if_safe(label)):
                     good_choose.append(label)
             
-            amount = {i:self.eat_amount(i) for i in good_choose if self.predict2(i) or self.if_risk(i)}
+            amount = {i:self.eat_amount(i) for i in good_choose if  self.if_risk(i)}
             maxi = (0,0)
             
             for i in amount.items():
@@ -357,7 +338,7 @@ class MyAgent(BaseAgent):
         else:
             if self.if_corner(avail_step2) != -1  :
                 return (action_dict[self.rev_enum[self.if_corner(avail_step2)]],pygame.USEREVENT)
-            amount = {label:self.eat_amount(label) for label in avail_step if self.if_risk(label) or self.predict2(label)}
+            amount = {label:self.eat_amount(label) for label in avail_step if self.if_risk(label)}
 
             maxi = (0,0)
             for i in amount.items():
