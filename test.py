@@ -49,7 +49,7 @@ class test:
             for j in range(-1, 2):
                 if col+j < 0 or col+j >= 8: continue
                 label = self.rows[row+i] + self.cols[col+j]
-                if status[self.enum[label]] == -1 * self.cur_player: #å‘¨åœæœ‰æ²’æœ‰ç™½æ£‹
+                if status[self.enum[label]] == -1 * self.cur_player: #??¨å?????æ²??????½æ??
                     if self._check_direction(row, col, i, j):
                         is_avail = True
         return is_avail
@@ -93,32 +93,27 @@ class test:
                     temp_count += 1
                     path.append(total_d)
                     total_d += d
+                    
                 elif status[pos+total_d] == self.cur_player:
                     count += temp_count
                     for i in path:
                         status[pos+i] = self.cur_player
                         color_change.append(pos+i)
+                    # print(self.get_game_state())
                     break
                 else :
                     break
-        # print(color_change, 'color')
         return color_change
 
     def predict2(self,label):
-        '''
-        estimate how much enemy can eat
-        '''
         status = self.get_game_state()
         status[self.enum[label]] = self.cur_player
         color_change = self.predict(label)
-        print(color_change, 'pop')
         self.cur_player = -self.cur_player
         avail = self._get_available_actions()
-        print(avail)
         if_ok = True
         for i in avail:
             if self.eat_amount(i) >= len(color_change):
-                
                 if_ok = False ; break
         self.cur_player = -self.cur_player
         status[self.enum[label]] = 0
@@ -147,7 +142,7 @@ class test:
 status = {
  0: 0,  1: 0,  2: 0,  3:-1,  4: 0,  5:-1,  6: 1,  7: 1, 
  8: 0,  9: 0, 10: 1, 11:-1, 12:-1, 13: 1, 14: 1, 15:-1, 
-16: 0, 17: 0, 18: 0, 19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 
+16: 0, 17: 0, 18: 0, 19:-1, 20: 1, 21: 1, 22: 1, 23: 1, 
 24: 0, 25:-1, 26: 1, 27: 1, 28: 1, 29: 1, 30: 1, 31:-1, 
 32: 0, 33: 0, 34: 1, 35: 1, 36: 1, 37: 1, 38: 0, 39:-1, 
 40: 0, 41: 0, 42: 0, 43: 0, 44: 1, 45: 1, 46:-1, 47:-1, 
@@ -157,6 +152,4 @@ status = {
 a = test(status = status)
 # print(a._get_available_actions())
 print(a.predict2('6D'))
-print(status == {0: 0, 1: 0, 2: 0, 3: -1, 4: 0, 5: -1, 6: 1, 7: 1, 8: 0, 9: 0, 10: 1, 11: -1, 12: -1, 13: 1, 14: 1, 15: -1, 16: 0, 17: 0, 18: 0, 19: -1, 20: 1, 21: 1, 22: -1, 23: 1, 24: 0, 25: -1, 26: 1, 27: -1, 28: 1, 29: -1, 30: 1, 31: -1, 32: 0, 33: 0, 34: -1, 35: -1, 36: -1, 
-37: 1, 38: 0, 39: -1, 40: 0, 41: 0, 42: 0, 43: 0, 44: -1, 45: -1, 46: -1, 47: -1, 48: 0, 49: 0, 50: 0, 51: 0, 52: 1, 53: -1, 54: -1, 55: -1, 56: 0, 57: 0, 58: 0, 59: 0, 60: 0, 61: 0, 62: 0, 63: 0})
 # print(a.get_game_state())
