@@ -1,4 +1,5 @@
-from agent.base_agent import RandomAgent, HumanAgent, BaseAgent   #edited : agent.base_Abase_agent
+# edited : agent.base_Abase_agent
+from agent.base_agent import RandomAgent, HumanAgent, BaseAgent
 from reversi import Reversi
 from env import Environment
 from reversi_board import ReversiBoard
@@ -8,12 +9,14 @@ import importlib
 import argparse
 from tqdm.auto import tqdm
 import copy
-from agent.CasperXu import MyAgent,BaseAgent
+from agent.CasperXu import MyAgent, BaseAgent
+
 
 def run_agent(agent: BaseAgent, reward: dict, obs: dict):
     action, event_type = agent.step(copy.deepcopy(reward), copy.deepcopy(obs))
-    reward = play_ground.act(action, event_type) # reward after an action
+    reward = play_ground.act(action, event_type)  # reward after an action
     return reward
+
 
 def main(play_ground, agent1, agent2, rounds):
     # start our loop
@@ -27,7 +30,7 @@ def main(play_ground, agent1, agent2, rounds):
         while play_ground.game_over() == False:
             if (run_iter % 2 == 0):
                 obs = play_ground.get_game_state()
-                
+
                 while True:
                     try:
                         reward1 = run_agent(agent1, reward1, obs)
@@ -49,20 +52,21 @@ def main(play_ground, agent1, agent2, rounds):
                         if reward2[1] != 0:
                             break
                     except (utils.ValueOutOfRange, utils.InvalidAction) as e:
-                        # print("invalid action! retry!") 
+                        # print("invalid action! retry!")
                         pass
                     except utils.NoAvailableAction:
                         # print("ignore white action")
                         play_ground._get_reward()
                         run_iter += 1
                         break
-            run_iter += 1 
-        
+            run_iter += 1
+
         play_ground._draw_frame()
         if game.winner == -1:
             n_black_wins += 1
 
-    print ('Your win rate is', n_black_wins / rounds)
+    print('Your win rate is', n_black_wins / rounds)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -80,19 +84,22 @@ if __name__ == "__main__":
         os.putenv('SDL_VIDEODRIVER', 'fbcon')
         os.environ["SDL_VIDEODRIVER"] = "dummy"
 
-    game = Reversi(width = args.width, height = args.height, time_limit=args.time_limit)
-    play_ground = Environment(game, force_fps = False)
+    game = Reversi(width=args.width, height=args.height,
+                   time_limit=args.time_limit)
+    play_ground = Environment(game, force_fps=False)
     rev_board = ReversiBoard()
 
     # init agent and game.
     play_ground.init()
     play_ground.display_screen = True
 
-    agent1_module = importlib.import_module("agent."+args.agent1.split('.')[0]) #edited:"agent."+
-    agent2_module = importlib.import_module("agent."+args.agent2.split('.')[0]) #edited"agent."+
-    
+    agent1_module = importlib.import_module(
+        "agent."+args.agent1.split('.')[0])  # edited:"agent."+
+    agent2_module = importlib.import_module(
+        "agent."+args.agent2.split('.')[0])  # edited"agent."+
 
-    agent1 = getattr(agent1_module, args.agent1.split('.')[1])(color = "black", rows_n = len(rev_board.rows), cols_n = len(rev_board.cols), width = args.width, height = args.height)
-    agent2 = getattr(agent2_module, args.agent2.split('.')[1])(color = "white", rows_n = len(rev_board.rows), cols_n = len(rev_board.cols), width = args.width, height = args.height)
+    agent1 = getattr(agent1_module, args.agent1.split('.')[1])(color="black", rows_n=len(
+        rev_board.rows), cols_n=len(rev_board.cols), width=args.width, height=args.height)
+    agent2 = getattr(agent2_module, args.agent2.split('.')[1])(color="white", rows_n=len(
+        rev_board.rows), cols_n=len(rev_board.cols), width=args.width, height=args.height)
     main(play_ground, agent1, agent2, args.rounds)
-
