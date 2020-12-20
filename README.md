@@ -12,4 +12,12 @@ name: Po-Yu Tseng</br>
 student id: b09902127</br>
 github: [spockwall](https://github.com/spockwall)
 
-## Report
+## Report 
+### First 
+Our strategy is to get corner or side in priority .
+### Second
+If there is no corner of side we can place, we choose the position that we can eat the greatest amount of enemy.
+### Third
+After the chessboard is occupied by over 50 piece in total, we change our algorithm </br> 
+to let how many pieces we can eat in priority rather than placing on side, </br>
+but if the corner is available, we still place piece on it in priority.
