@@ -160,13 +160,35 @@ class MyAgent(BaseAgent):
                 else: break 
         if count>0:return True
         else: return False
-    
-    def if_give_corner(self, pos:int):
+
+    def check_if_safe2(self,label):
         status = self.get_game_state()
-        for i in [0,7,56,63]:
-            if abs(i-pos)==1 and status[pos] != self.cur_player :return False
-        return True
-        
+        status[self.enum[label]] = self.cur_player
+        self.cur_player = -self.cur_player
+        color_change = self.predict(label)
+
+        avail = self._get_available_actions()
+        count = True
+        for label2 in avail:
+            pos = self.enum[label2]
+            if abs(pos-self.enum[label2])<=9:
+                d = self.enum[label2] - pos
+                while 0<=pos+d<64:
+                    pos+=d
+                    if status[pos] == self.cur_player:
+                        count = False
+                        break 
+                    elif status[pos] == 0:
+                        break
+                    
+        status[self.enum[label]] = 0
+        self.cur_player = -self.cur_player
+        for i in color_change:
+            status[i] = -self.cur_player
+        return count
+            
+
+
     def if_corner(self, avail_act):
         for pos in  [0,7,56,63]:
             if pos in avail_act:
@@ -188,9 +210,7 @@ class MyAgent(BaseAgent):
                 elif status[pos+total_d] == self.cur_player:
                     count += temp_count
                     break
-                elif status[pos+total_d] == 0:
-                    break
-                elif status[pos+total_d] == 2:
+                else :
                     break
         return count
 
@@ -228,6 +248,79 @@ class MyAgent(BaseAgent):
                         return False
         return True 
         
+    def predict(self, label):
+        status = self.get_game_state()
+        count = 0
+        pos = self.enum[label]
+        valid_step = [1, -1, 8, -8, 7, -7, 9, -9]
+        color_change = []
+        for d in valid_step:
+            temp_count = 0
+            total_d = d
+            path = []
+            while 0 <= pos+total_d <=63:
+                if status[pos+total_d] == -self.cur_player:
+                    temp_count += 1
+                    path.append(total_d)
+                    total_d += d
+                elif status[pos+total_d] == self.cur_player:
+                    count += temp_count
+                    for i in path:
+                        status[pos+i] = self.cur_player
+                        color_change.append(pos+i)
+                    break
+                else :
+                    break
+        return color_change
+
+    def predict2(self,label):
+        '''
+        estimate how much enemy can eat
+        '''
+        status = self.get_game_state()
+        status[self.enum[label]] = self.cur_player
+        color_change = self.predict(label)
+        self.cur_player = -self.cur_player
+        avail = self._get_available_actions()
+        if_ok = True
+        for i in avail:
+            if self.eat_amount(i) >= len(color_change):
+                if_ok = False ; break
+        self.cur_player = -self.cur_player
+        status[self.enum[label]] = 0
+        for i in color_change:
+            status[i] = -self.cur_player
+        return if_ok
+    
+
+ 
+
+    # def if_give_corner(self,label):
+    #     status = self.get_game_state()
+    #     status[self.enum[label]] = self.cur_player
+    #     self.cur_player = -self.cur_player
+    #     color_change = self.predict(label)
+    #     avail = self._get_available_actions()
+    #     status[self.enum[label]] = 0
+    #     self.cur_player = -self.cur_player
+    #     # for i in color_change:
+    #     #     status[i] = -self.cur_player
+    #     for i in [0, 7, 56, 63]:
+    #         if self.rev_enum[i] in avail:
+    #             return False
+    #     return True
+
+    def if_give_corner(self, label):
+        status = self.get_game_state()
+        pos = self.enum[label]
+        for i in [0,7,56,63]:
+            if abs(i-pos)==1 and status[i] != self.cur_player :return False
+        return True
+
+        
+
+
+
     def step(self, reward, obs):
         '''
         status(obs) :  dict     (key:0~63, value:-1,0,1)
@@ -235,7 +328,6 @@ class MyAgent(BaseAgent):
         actions :      list     (label)
         avail_step :   list     (label)
         '''
-        
         self.status = obs
         action_dict = self._init_action_set()
         avail_step =  self._get_available_actions()
@@ -248,10 +340,10 @@ class MyAgent(BaseAgent):
             good_choose = []
             for label in avail_step:    
                 degree = self.how_close_to_edge(label)
-                if degree == 0  and self.if_give_corner(self.enum[label]) and self.check_if_safe(label):
+                if degree == 0  and self.if_give_corner(label) and self.check_if_safe2(label):
                     good_choose.append(label)
             
-            amount = {i:self.eat_amount(i) for i in good_choose}
+            amount = {i:self.eat_amount(i) for i in good_choose if self.predict2(i) or self.if_risk(i)}
             maxi = (0,0)
             
             for i in amount.items():
@@ -259,15 +351,14 @@ class MyAgent(BaseAgent):
             if maxi != (0,0): return (action_dict[maxi[0]], pygame.USEREVENT)
 
             if avail_step != []:
-                not_bad = []
-                for i in avail_step:
-                    if self.if_give_corner(self.enum[i]) : not_bad.append(i)
+                not_bad = [i for i in avail_step if self.if_give_corner(i)]
                 if not_bad != [] : return (action_dict[sample(not_bad,1)[0]], pygame.USEREVENT)
                 else : return (action_dict[sample(avail_step,1)[0]], pygame.USEREVENT)
         else:
             if self.if_corner(avail_step2) != -1  :
                 return (action_dict[self.rev_enum[self.if_corner(avail_step2)]],pygame.USEREVENT)
-            amount = {label:self.eat_amount(label) for label in avail_step if self.if_risk(label)}
+            amount = {label:self.eat_amount(label) for label in avail_step if self.if_risk(label) or self.predict2(label)}
+
             maxi = (0,0)
             for i in amount.items():
                 if i[1] >= maxi[1]:
@@ -276,14 +367,9 @@ class MyAgent(BaseAgent):
                 return (action_dict[maxi[0]], pygame.USEREVENT)
             
             if avail_step != []:
-                not_bad = []
-                for i in avail_step:
-                    if self.if_give_corner(self.enum[i]):
-                        not_bad.append(i)
+                not_bad = [i for i in avail_step if self.if_give_corner(i)]
                 if not_bad != []:
                     return (action_dict[sample(not_bad,1)[0]], pygame.USEREVENT)
                 else:
                     return (action_dict[sample(avail_step,1)[0]], pygame.USEREVENT)
         return None 
-
-
