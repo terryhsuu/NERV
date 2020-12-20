@@ -324,7 +324,7 @@ class MyAgent(BaseAgent):
                 if degree == 0  and (self.if_give_corner(label) and self.check_if_safe(label)):
                     good_choose.append(label)
             
-            amount = {i:self.eat_amount(i) for i in good_choose if  self.if_risk(i)}
+            amount = {i:self.eat_amount(i) for i in good_choose if  self.if_risk(i) or self.predict2(label)}
             maxi = (0,0)
             
             for i in amount.items():
@@ -338,7 +338,7 @@ class MyAgent(BaseAgent):
         else:
             if self.if_corner(avail_step2) != -1  :
                 return (action_dict[self.rev_enum[self.if_corner(avail_step2)]],pygame.USEREVENT)
-            amount = {label:self.eat_amount(label) for label in avail_step if self.if_risk(label)}
+            amount = {label:self.eat_amount(label) for label in avail_step if self.if_risk(label) or self.predict2(label)}
 
             maxi = (0,0)
             for i in amount.items():
