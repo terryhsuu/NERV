@@ -210,6 +210,7 @@ class MyAgent(BaseAgent):
             if pos in avail_act:
                 return pos
         return -1
+
     def eat_amount(self, label):
         status = self.get_game_state()
         count = 0
@@ -342,23 +343,26 @@ class MyAgent(BaseAgent):
         action_dict = self._init_action_set()
         avail_step = self._get_available_actions()
         avail_step2 = [self.enum[i] for i in avail_step]
-        
+
         if self.endpoint():
-            if self.if_corner(avail_step2) != -1  :
-                return (action_dict[self.rev_enum[self.if_corner(avail_step2)]],pygame.USEREVENT)
-            
+            if self.if_corner(avail_step2) != -1:
+                return (action_dict[self.rev_enum[self.if_corner(avail_step2)]], pygame.USEREVENT)
+
             good_choose = []
-            for label in avail_step:    
+            for label in avail_step:
                 degree = self.how_close_to_edge(label)
-                if degree == 0  and (self.if_give_corner(label) and self.check_if_safe(label)):
+                if degree == 0 and (self.if_give_corner(label) and self.check_if_safe2(label)):
                     good_choose.append(label)
-            
-            amount = {i:self.eat_amount(i) for i in good_choose if  self.if_risk(i)}
-            maxi = (0,0)
-            
+
+            amount = {i: self.eat_amount(i)
+                      for i in good_choose if self.if_risk(i)}
+            maxi = (0, 0)
+
             for i in amount.items():
-                if i[1] >= maxi[1]: maxi = i
-            if maxi != (0,0): return (action_dict[maxi[0]], pygame.USEREVENT)
+                if i[1] >= maxi[1]:
+                    maxi = i
+            if maxi != (0, 0):
+                return (action_dict[maxi[0]], pygame.USEREVENT)
 
         if self.endpoint():
             if self.if_corner(avail_step2) != -1:
