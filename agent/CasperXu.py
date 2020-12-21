@@ -146,60 +146,6 @@ class MyAgent(BaseAgent):
                 return True
             else:
                 break
-<<<<<<< HEAD
-        return False  
-
-    def check_if_safe(self,label):
-        status = self.get_game_state()
-        pos = self.enum[label]
-        valid_step = [1, -1, 8, -8, 7, -7, 9, -9]
-        count = 0 
-        for i in valid_step:
-            pos_ = pos
-            while 0 <= pos_ + i <= 63:
-                pos_+=i
-                if status[pos_] == self.cur_player : continue
-                elif status[pos_] == -self.cur_player:
-                    amount = 0
-                    while 0 <= pos_+i <=63:
-                        amount += 1
-                        pos_ += i
-                        if status[pos_] == self.cur_player:
-                            if self.check_again(pos_, i) : count += amount
-                            else : count -= (amount+2)
-                        elif status[pos_] == -self.cur_player : continue
-                        else: break
-                else: break 
-        if count>0:return True
-        else: return False
-
-    def check_if_safe2(self,label):
-        status = self.get_game_state()
-        status[self.enum[label]] = self.cur_player
-        self.cur_player = -self.cur_player
-        color_change = self.predict(label)
-        avail = self._get_available_actions()
-        count = True
-        for label2 in avail:
-            pos = self.enum[label2]
-            if abs(pos-self.enum[label2])<=9:
-                d = self.enum[label2] - pos
-                while 0<=pos+d<64:
-                    pos+=d
-                    if status[pos] == self.cur_player:
-                        count = False
-                        break 
-                    elif status[pos] == 0:
-                        break
-                    
-        status[self.enum[label]] = 0
-        self.cur_player = -self.cur_player
-        for i in color_change:
-            status[i] = -self.cur_player
-        return count
-            
-
-=======
 
     def check_if_safe(self, label):
         status = self.get_game_state()
@@ -258,18 +204,12 @@ class MyAgent(BaseAgent):
         for i in color_change:
             status[i] = -self.cur_player
         return count
->>>>>>> final
 
     def if_corner(self, avail_act):
         for pos in [0, 7, 56, 63]:
             if pos in avail_act:
                 return pos
         return -1
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> final
     def eat_amount(self, label):
         status = self.get_game_state()
         count = 0
@@ -285,11 +225,7 @@ class MyAgent(BaseAgent):
                 elif status[pos+total_d] == self.cur_player:
                     count += temp_count
                     break
-<<<<<<< HEAD
-                else :
-=======
                 else:
->>>>>>> final
                     break
         return count
 
@@ -301,34 +237,6 @@ class MyAgent(BaseAgent):
         for i in status:
             if status[i] == -self.cur_player:
                 enemy += 1
-<<<<<<< HEAD
-                if i in [0,7,56,63]:
-                    corner-=1
-            elif status[i] == self.cur_player:
-                mine += 1
-                if i in [0,7,56,63]:
-                    corner+=1
-        if mine + enemy >= 50 and corner >0 :#and mine < enemy:
-            return False 
-        return True
-        
-    def if_risk(self, label):
-        status = self.get_game_state()
-        a = [ 1, 2, 3, 4, 5, 6]
-        b = [57,58,59,60,61,62]
-        c = [ 8,16,24,32,40,48]
-        d = [15,23,31,39,47,55]
-        e = [ 9,18,27,36,45,54]
-        f = [14,21,28,35,42,49]
-        x = [ a, b, c, d, e, f]
-        for list_ in x:
-                if self.enum[label] in list_:
-                    gap = list_[1]-list_[0]
-                    if status[list_[0]-gap] == -self.cur_player and status[list_[-1]+gap] == -self.cur_player:
-                        return False
-        return True 
-        
-=======
                 if i in [0, 7, 56, 63]:
                     corner -= 1
             elif status[i] == self.cur_player:
@@ -355,7 +263,6 @@ class MyAgent(BaseAgent):
                     return False
         return True
 
->>>>>>> final
     def predict(self, label):
         status = self.get_game_state()
         count = 0
@@ -366,11 +273,7 @@ class MyAgent(BaseAgent):
             temp_count = 0
             total_d = d
             path = []
-<<<<<<< HEAD
-            while 0 <= pos+total_d <=63:
-=======
             while 0 <= pos+total_d <= 63:
->>>>>>> final
                 if status[pos+total_d] == -self.cur_player:
                     temp_count += 1
                     path.append(total_d)
@@ -381,19 +284,11 @@ class MyAgent(BaseAgent):
                         status[pos+i] = self.cur_player
                         color_change.append(pos+i)
                     break
-<<<<<<< HEAD
-                else :
-                    break
-        return color_change
-
-    def predict2(self,label):
-=======
                 else:
                     break
         return color_change
 
     def predict2(self, label):
->>>>>>> final
         '''
         estimate how much enemy can eat
         '''
@@ -405,31 +300,13 @@ class MyAgent(BaseAgent):
         if_ok = True
         for i in avail:
             if self.eat_amount(i) >= len(color_change):
-<<<<<<< HEAD
-                if_ok = False ; break
-=======
                 if_ok = False
                 break
->>>>>>> final
         self.cur_player = -self.cur_player
         status[self.enum[label]] = 0
         for i in color_change:
             status[i] = -self.cur_player
         return if_ok
-<<<<<<< HEAD
-    
-    def if_give_corner(self, label):
-        status = self.get_game_state()
-        pos = self.enum[label]
-        for i in [0,7,56,63]:
-            if abs(i-pos)==1 and status[i] != self.cur_player :return False
-        return True
-
-        
-
-
-
-=======
 
     # def if_give_corner(self,label):
     #     status = self.get_game_state()
@@ -454,7 +331,6 @@ class MyAgent(BaseAgent):
                 return False
         return True
 
->>>>>>> final
     def step(self, reward, obs):
         '''
         status(obs) :  dict     (key:0~63, value:-1,0,1)
@@ -484,31 +360,6 @@ class MyAgent(BaseAgent):
                 if i[1] >= maxi[1]: maxi = i
             if maxi != (0,0): return (action_dict[maxi[0]], pygame.USEREVENT)
 
-<<<<<<< HEAD
-            if avail_step != []:
-                not_bad = [i for i in avail_step if self.if_give_corner(i)]
-                if not_bad != [] : return (action_dict[sample(not_bad,1)[0]], pygame.USEREVENT)
-                else : return (action_dict[sample(avail_step,1)[0]], pygame.USEREVENT)
-        else:
-            if self.if_corner(avail_step2) != -1  :
-                return (action_dict[self.rev_enum[self.if_corner(avail_step2)]],pygame.USEREVENT)
-            amount = {label:self.eat_amount(label) for label in avail_step if self.if_risk(label) or self.predict2(label)}
-
-            maxi = (0,0)
-            for i in amount.items():
-                if i[1] >= maxi[1]:
-                    maxi = i
-            if maxi != (0,0):
-                return (action_dict[maxi[0]], pygame.USEREVENT)
-            
-            if avail_step != []:
-                not_bad = [i for i in avail_step if self.if_give_corner(i)]
-                if not_bad != []:
-                    return (action_dict[sample(not_bad,1)[0]], pygame.USEREVENT)
-                else:
-                    return (action_dict[sample(avail_step,1)[0]], pygame.USEREVENT)
-        return None 
-=======
         if self.endpoint():
             if self.if_corner(avail_step2) != -1:
                 return (action_dict[self.rev_enum[self.if_corner(avail_step2)]], pygame.USEREVENT)
@@ -555,4 +406,3 @@ class MyAgent(BaseAgent):
                 else:
                     return (action_dict[sample(avail_step, 1)[0]], pygame.USEREVENT)
         return None
->>>>>>> final
