@@ -20,7 +20,7 @@ class BaseAgent():
         self.top_left = (0, 0)
         self.actions = self._init_action_set()
         self.status = {i: 0 for i in range(64)}
-        self.cur_player = -1
+        self.cur_player = -1 if self.color == 'black' else 1
         self.enum = {}
         count = 0
         for i in self.rows:
@@ -343,26 +343,6 @@ class MyAgent(BaseAgent):
         action_dict = self._init_action_set()
         avail_step = self._get_available_actions()
         avail_step2 = [self.enum[i] for i in avail_step]
-
-        if self.endpoint():
-            if self.if_corner(avail_step2) != -1:
-                return (action_dict[self.rev_enum[self.if_corner(avail_step2)]], pygame.USEREVENT)
-
-            good_choose = []
-            for label in avail_step:
-                degree = self.how_close_to_edge(label)
-                if degree == 0 and (self.if_give_corner(label) and self.check_if_safe2(label)):
-                    good_choose.append(label)
-
-            amount = {i: self.eat_amount(i)
-                      for i in good_choose if self.if_risk(i)}
-            maxi = (0, 0)
-
-            for i in amount.items():
-                if i[1] >= maxi[1]:
-                    maxi = i
-            if maxi != (0, 0):
-                return (action_dict[maxi[0]], pygame.USEREVENT)
 
         if self.endpoint():
             if self.if_corner(avail_step2) != -1:
