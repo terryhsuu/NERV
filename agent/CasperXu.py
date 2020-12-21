@@ -353,7 +353,7 @@ class MyAgent(BaseAgent):
                 if degree == 0  and (self.if_give_corner(label) and self.check_if_safe(label)):
                     good_choose.append(label)
             
-            amount = {i:self.eat_amount(i) for i in good_choose if  self.if_risk(i) or self.predict2(label)}
+            amount = {i:self.eat_amount(i) for i in good_choose if  self.if_risk(i)}
             maxi = (0,0)
             
             for i in amount.items():
@@ -367,7 +367,7 @@ class MyAgent(BaseAgent):
             good_choose = []
             for label in avail_step:
                 degree = self.how_close_to_edge(label)
-                if degree == 0 and self.if_give_corner(label) and self.check_if_safe2(label):
+                if degree == 0 and self.if_give_corner(label) and self.check_if_safe(label):
                     good_choose.append(label)
 
             amount = {i: self.eat_amount(i)
